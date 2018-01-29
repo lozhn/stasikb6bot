@@ -1,0 +1,23 @@
+To calculate expressions, the bot uses wolframalpha api.
+
+For example:
+
+Derivative:
+>>> D[2 x + 3 x^3, x]
+Solution: d/dx(2 x + 3 x^3) = 9 x^2 + 2
+
+Indefinite integral:
+>>> Integrate[D[3 x^3 + 2 x, x], x]
+Solution: integral (d(3 x^3 + 2 x))/(dx) dx = 3 x^3 + 2 x + constant
+
+Global minimum:
+>>> Minimize[2 + 9 x^2, x]
+Solution: min{2 + 9 x^2} = 2 at x = 0
+
+Polynomial discriminant:
+>>> Discriminant[2 + 9 x^2, x]
+Solution: -72
+
+Square root:
+>>> sqrt(144)
+Solution: 12
