@@ -2,7 +2,6 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 games = {}
 
-
 def tictactoe(bot, update):
     player = update.message.chat.username
     print("tictactoe command " + player)
