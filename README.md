@@ -1,5 +1,7 @@
 `pip install -r libs.txt`
 
-`source ENV`
+`python run.py`
 
-`python bot.py`
+[@StasikB6bot](https://t.me/@StasikB6bot)
+
+B6 - Katerina Yudina, Nikita Lozhnikov, Mikhail Kizilov, Vitaliy Smolin
