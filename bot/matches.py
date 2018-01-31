@@ -1,38 +1,49 @@
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
+games = {}
+
+keyboard = [[InlineKeyboardButton(1, callback_data='matches_1'),
+             InlineKeyboardButton(2, callback_data='matches_2'),
+             InlineKeyboardButton(3, callback_data='matches_3'),
+             InlineKeyboardButton(4, callback_data='matches_4')],
+
+            [InlineKeyboardButton("Start new game", callback_data='matches_0')]]
+
+reply_markup = InlineKeyboardMarkup(keyboard)
 
 
 def matches_cmd(bot, update, args):
-    pass
+    player = update.message.chat.username
+    games[player] = 21
+    reply_text = f"Table: {'| ' * games[player]} \n Your turn: pick matches"
+    update.message.reply_text(reply_text, reply_markup=reply_markup)
 
 
-def matches_cb(bot, update, args):
-    pass
+def matches_cb(bot, update):
+    player = update.effective_message.chat.username
+    state = games[player]
+    move = int(update.callback_query.data)
 
-init_state = 21
+    if move == 0:
+        games[player] = 21
+        response = f"Table: {'| ' * games[player]} \nYour turn: pick matches"
+    else:
+        response = _move(state, player, move)
+    update.callback_query.message.edit_text(response, reply_markup=reply_markup)
 
 
+def _move(state, player, move):
+    state -= move
+    ai = 5 - move
+    state -= ai
 
-def round(state):
+    reply_text = f"Table [{state}]: {'| ' * state} \n"
+
+    reply_text += f"You picked : {move}. AI picked : {ai} \n"
+
+
     if state == 1:
-        return "You lose"
+        reply_text += "You lose :("
 
-    print('-'*10)
-    print(f'State: {state}')
-
-    player_move = 0
-    while player_move < 1 or player_move > 4:
-        try:
-            player_move = int(input('Your turn: '))
-        except Exception as e:
-            print('Choose 1 to 4 matches')
-
-    state -= player_move
-
-    ai_move = 5 - player_move
-    print(f'Computer turn: {ai_move}')
-
-    state -= ai_move
-    print(f'{state} matches left')
-
-    return round(state)
-
+    games[player] = state
+    return reply_text
