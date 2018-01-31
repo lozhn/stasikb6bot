@@ -6,8 +6,9 @@ from telegram.ext import Updater, CommandHandler, CallbackQueryHandler,  Message
 
 from bot.tictactoe import tictactoe, button
 from bot.calculator import calculator
+from bot.xo import xo_game, xo_move, XOFilter
 
-#logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 def start(bot, update):
@@ -35,8 +36,11 @@ def run(env):
     updater.dispatcher.add_handler(CommandHandler('hello', hello))
     updater.dispatcher.add_handler(CommandHandler('help',  help))
     updater.dispatcher.add_handler(CommandHandler('tictactoe', tictactoe))
+    updater.dispatcher.add_handler(CommandHandler('xo',  xo_game))
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
-    updater.dispatcher.add_handler(MessageHandler(Filters.text, calculator))
+    #updater.dispatcher.add_handler(MessageHandler(Filters.text, calculator))
+
+    updater.dispatcher.add_handler(MessageHandler(XOFilter(), xo_move))
 
     updater.start_polling()
     updater.idle()
