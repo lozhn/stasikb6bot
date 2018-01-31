@@ -236,9 +236,10 @@ class Game:
   
   def move_ai(self):
     if self.field.is_game_over():
-      return
+      return None
     row, col = self.get_best_move()
     self.field.move(row, col, AI_PLAYER)
+    return (row, col)
     
   def minimax(self, new_field, player, depth, alpha, beta):
     if new_field.get_state() == State.WIN_X:
@@ -298,6 +299,11 @@ def xo_move(bot, update):
     row = int(num) - 1
     col = ord(letter) - ord("A")
     return (row, col)
+
+  def move_to_str(move):
+    row, col = move
+    return chr(col + ord("A")) + str(row + 1)
+
   
   text = update.message.text
   player = update.effective_message.chat.username
@@ -311,7 +317,9 @@ def xo_move(bot, update):
     return 
   update.message.reply_text(f"Move {text}!")
   game.move_player(row, col)
-  game.move_ai()
+  move = game.move_ai()
+  if move:
+    update.message.reply_text(f"AI move {move_to_str(move)}!")
 
   field = game.pretty_field()
 
