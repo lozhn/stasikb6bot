@@ -1,42 +1,51 @@
-import os
 import logging
+from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, MessageHandler, Filters
 
+from bot.start import start_cmd
+from bot.help import help_cmd_factory
+from bot.matches import matches_cmd, matches_cb
+from bot.tictactoe import tictactoe_cmd, tictactoe_cb
+import wolframalpha
 
-from telegram.ext import Updater, CommandHandler, CallbackQueryHandler,  MessageHandler, Filters
+logging.basicConfig(level=logging.WARN, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-from bot.tictactoe import tictactoe, button
-from bot.calculator import calculator
+def common_cb_handler(bot, update):
+    path, val = update.callback_query.data.split('_')
+    update.callback_query.data = val
 
-#logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+    if path == 'tictactoe':
+        tictactoe_cb(bot, update)
 
-def start(bot, update):
-    bot.send_message(chat_id=update.message.chat_id, \
-                        text=f'Hi {update.message.from_user.first_name}')
+    if path == 'matches':
+        matches_cb(bot, update)
 
-def hello(bot, update):
-    update.message.reply_text(f'Hi {update.message.from_user.first_name}')
-
-def help(bot, update):
-    update.message.reply_text(f'Enter /tictactoe to play in tic-tac-toe')
-
-def error(bot, update, error):
-    """Log Errors caused by Updates."""
-    logger.warning('Update "%s" caused error "%s"', update, error)
+    if path == 'xo':
+        pass
 
 
 def run(env):
     if not env:
-        raise "No env"
+        raise Exception("No env")
 
     updater = Updater(env['TELEGRAM_TOKEN'])
 
-    updater.dispatcher.add_handler(CommandHandler('start', start))
-    updater.dispatcher.add_handler(CommandHandler('hello', hello))
-    updater.dispatcher.add_handler(CommandHandler('help',  help))
-    updater.dispatcher.add_handler(CommandHandler('tictactoe', tictactoe))
-    updater.dispatcher.add_handler(CallbackQueryHandler(button))
-    updater.dispatcher.add_handler(MessageHandler(Filters.text, calculator))
+    help = help_cmd_factory(env['HELP_TEXT'])
+    start = start_cmd
+    client = wolframalpha.Client(env['WOLFRAM_TOKEN'])
+
+    def _calculator_cmd(bot, update):
+        res = client.query(update.message.text)
+        update.message.reply_text(next(res.results).text)
+
+    updater.dispatcher.add_handler(CommandHandler('start', start, pass_args=True))
+    updater.dispatcher.add_handler(CommandHandler('help', help, pass_args=True))
+
+    updater.dispatcher.add_handler(CommandHandler('tictactoe', tictactoe_cmd, pass_args=True))
+    updater.dispatcher.add_handler(CommandHandler('matches', matches_cmd, pass_args=True))
+
+
+    updater.dispatcher.add_handler(MessageHandler(Filters.text, _calculator_cmd))
+    updater.dispatcher.add_handler(CallbackQueryHandler(common_cb_handler))
 
     updater.start_polling()
     updater.idle()
