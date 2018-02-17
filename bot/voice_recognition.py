@@ -3,6 +3,7 @@ import uuid
 import requests
 from bs4 import BeautifulSoup
 from pydub import AudioSegment
+from bot.command_parser import parse_command
 
 API_KEY = '89665de6-d76c-40ba-ac6b-a13b52bf32f1'
 UUID = str(uuid.uuid4()).replace("-", "")
@@ -16,13 +17,14 @@ def voice_cmd(bot, update):
     voice = AudioSegment.from_ogg(file_name)
     voice.export(export_file_name, format="wav")
     result = recognize(export_file_name, UUID)
-    update.message.reply_text(result)
+    command = parse_command(result)
+    update.message.reply_text(result + " " + str(command))
     os.remove(file_name)
     os.remove(export_file_name)
 
 
 def recognize(voice, uid):
-    languages = ['ru-RU', 'en-US']
+    languages = ['en-US']
     result = dict()
     data = open(voice, "rb").read()
     for lang in languages:
