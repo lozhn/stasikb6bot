@@ -5,6 +5,7 @@ from bot.start import start_cmd
 from bot.help import help_cmd_factory
 from bot.matches import matches_cmd, matches_cb
 from bot.tictactoe import tictactoe_cmd, tictactoe_cb
+from bot.voice_recognition import voice_cmd
 from bot.xo import xo_cmd, xo_move
 import wolframalpha
 
@@ -37,11 +38,10 @@ def run(env):
         res = client.query(update.message.text)
         update.message.reply_text(next(res.results).text)
 
-    updater.dispatcher.add_handler(
-        CommandHandler('start', start, pass_args=True))
-    updater.dispatcher.add_handler(
-        CommandHandler('help', help, pass_args=True))
-
+    updater.dispatcher.add_handler(CommandHandler(
+        'start', start, pass_args=True))
+    updater.dispatcher.add_handler(CommandHandler(
+        'help', help, pass_args=True))
     updater.dispatcher.add_handler(CommandHandler(
         'tictactoe', tictactoe_cmd, pass_args=True))
     updater.dispatcher.add_handler(CommandHandler(
@@ -51,8 +51,12 @@ def run(env):
     updater.dispatcher.add_handler(CommandHandler(
         'move', xo_move, pass_args=True))
 
-    updater.dispatcher.add_handler(
-        MessageHandler(Filters.text, _calculator_cmd))
+
+    updater.dispatcher.add_handler(MessageHandler(
+        Filters.text, _calculator_cmd))
+    updater.dispatcher.add_handler(MessageHandler(
+        Filters.voice, voice_cmd))
+    
     updater.dispatcher.add_handler(CallbackQueryHandler(common_cb_handler))
 
     updater.start_polling()
