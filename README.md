@@ -1,6 +1,5 @@
-`pip install -r libs.txt`
-`python -m spacy download en`
-`python run.py`
+`make install`
+`make run`
 
 [@StasikB6bot](https://t.me/@StasikB6bot)
 

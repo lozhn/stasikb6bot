@@ -1,13 +1,15 @@
 import logging
+
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, MessageHandler, Filters
 
+from bot.quit import quit_cmd_factory
 from bot.start import start_cmd
 from bot.help import help_cmd_factory
 from bot.matches import matches_cmd, matches_cb
 from bot.tictactoe import tictactoe_cmd, tictactoe_cb
 from bot.voice_recognition import voice_cmd
 from bot.xo import xo_cmd, xo_move
-import wolframalpha
+from bot.calculator import calculator_cmd_factory
 
 logging.basicConfig(level=logging.WARN,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -30,33 +32,41 @@ def run(env):
 
     updater = Updater(env['TELEGRAM_TOKEN'])
 
-    help = help_cmd_factory(env['HELP_TEXT'])
-    start = start_cmd
-    client = wolframalpha.Client(env['WOLFRAM_TOKEN'])
+    helper_cmd = help_cmd_factory(env['HELP_TEXT'])
+    calculator_cmd = calculator_cmd_factory(env['WOLFRAM_TOKEN'])
+    quit_cmd = quit_cmd_factory(updater)
 
-    def _calculator_cmd(bot, update):
-        res = client.query(update.message.text)
-        update.message.reply_text(next(res.results).text)
+    # Defaults
+    updater.dispatcher.add_handler(CommandHandler(
+        'start', start_cmd, pass_args=True))
+    updater.dispatcher.add_handler(CommandHandler(
+        'help', helper_cmd, pass_args=True))
+    updater.dispatcher.add_handler(CommandHandler(
+        'quit', quit_cmd))
 
-    updater.dispatcher.add_handler(CommandHandler(
-        'start', start, pass_args=True))
-    updater.dispatcher.add_handler(CommandHandler(
-        'help', help, pass_args=True))
+    # Tic-tac-toe
     updater.dispatcher.add_handler(CommandHandler(
         'tictactoe', tictactoe_cmd, pass_args=True))
+
+    # Mathces
     updater.dispatcher.add_handler(CommandHandler(
         'matches', matches_cmd, pass_args=True))
+
+    # Calculator
+    updater.dispatcher.add_handler(CommandHandler(
+        'calc', calculator_cmd, pass_args=True))
+
+    # XO
     updater.dispatcher.add_handler(CommandHandler(
         'xo', xo_cmd, pass_args=True))
     updater.dispatcher.add_handler(CommandHandler(
         'move', xo_move, pass_args=True))
 
-
-    updater.dispatcher.add_handler(MessageHandler(
-        Filters.text, _calculator_cmd))
+    # Voice
     updater.dispatcher.add_handler(MessageHandler(
         Filters.voice, voice_cmd))
-    
+
+    # a.k.a. Callback Router
     updater.dispatcher.add_handler(CallbackQueryHandler(common_cb_handler))
 
     updater.start_polling()
