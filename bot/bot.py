@@ -7,9 +7,12 @@ from bot.start import start_cmd
 from bot.help import help_cmd_factory
 from bot.matches import matches_cmd, matches_cb
 from bot.tictactoe import tictactoe_cmd, tictactoe_cb
-from bot.voice_recognition import voice_cmd
 from bot.xo import xo_cmd, xo_move
 from bot.calculator import calculator_cmd_factory
+from bot.translater import translate_cmd_factory
+from bot.darknet.darknetyolo import detect_object_cmd
+import locale
+locale.setlocale(locale.LC_ALL, '')
 
 logging.basicConfig(level=logging.WARN,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -35,6 +38,7 @@ def run(env):
     helper_cmd = help_cmd_factory(env['HELP_TEXT'])
     calculator_cmd = calculator_cmd_factory(env['WOLFRAM_TOKEN'])
     quit_cmd = quit_cmd_factory(updater)
+    translate = translate_cmd_factory(env['TRANSLATE_API'])
 
     # Defaults
     updater.dispatcher.add_handler(CommandHandler(
@@ -62,9 +66,16 @@ def run(env):
     updater.dispatcher.add_handler(CommandHandler(
         'move', xo_move, pass_args=True))
 
-    # Voice
+    # Translator
+    updater.dispatcher.add_handler(CommandHandler(
+        'translate', translate, pass_args=True))
+
+    # Objects detection
+
     updater.dispatcher.add_handler(MessageHandler(
-        Filters.voice, voice_cmd))
+        Filters.photo, detect_object_cmd
+    ))
+
 
     # a.k.a. Callback Router
     updater.dispatcher.add_handler(CallbackQueryHandler(common_cb_handler))
