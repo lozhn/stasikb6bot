@@ -8,29 +8,25 @@ from darknet import *
 import cv2
 from random import randint
 
+prefix = os.path.join(os.getcwd(), 'bot/darknet/')
+_config = f"{prefix}/cfg/yolov3.cfg"
+_weights = f"{prefix}/yolov3.weights"
 
-# NB use binary strings for compatibility with binaries
-prefix = b'/home/katerina/Documents/git/stasikb6bot/bot/darknet/'
-# to load network you need its structure (config) and neuron weights
-net = load_net(prefix + b"cfg/yolov3.cfg", prefix + b"yolov3.weights", 0)
-
-# meta provides info about dataset tags
-# we need it to know how many tags are there in data/coco.names file
-meta = load_meta(prefix + b"cfg/coco.data")
+net = load_net(_config), _weights, 0))
+meta = load_meta(x(prefix + "cfg/coco.data"))
 
 
 def detect_object_cmd(bot, update):
-    
+
     file_id = update.message.photo[3].file_id
     photoFile = bot.get_file(file_id)
     file_name = f"{file_id}.jpg"
     image = bot.get_file(file_id).download(file_name)
 
-    imagepath = os.path.join("/home/katerina/Documents/git/stasikb6bot/", image)
+    imagepath = os.path.join(os.getcwd(), image)
 
     bb = detect(net, meta, imagepath.encode('UTF-8'))
-    # update.message.reply_text('Please, wait some seconds.')
-
+    
     img = cv2.cvtColor(cv2.imread(imagepath), cv2.COLOR_BGR2RGB)
 
     for count, value in enumerate(bb):
@@ -41,7 +37,7 @@ def detect_object_cmd(bot, update):
         pt1 = (int(x - w/2), int(y - h/2))
         pt2 = (int(x + w/2), int(y + h/2))
         cv2.rectangle(img, pt1, pt2, (randint(0, 255), randint(0, 255), randint(0, 255)), 2)
-        cv2.putText(img, name.decode("utf-8") , pt1, cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 0), 2)
+        cv2.putText(img, name.decode("UTF-8") , pt1, cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 0), 2)
         cv2.putText(img, '{:0.5f}'.format(confidence) , (int(x - w/2 + 20), int(y - h/2 + 20)) , cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 0), 2)
 
 

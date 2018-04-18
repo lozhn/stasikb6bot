@@ -10,7 +10,7 @@ from bot.tictactoe import tictactoe_cmd, tictactoe_cb
 from bot.xo import xo_cmd, xo_move
 from bot.calculator import calculator_cmd_factory
 from bot.translater import translate_cmd_factory
-from bot.darknet.darknetyolo import detect_object_cmd
+from bot.object_detector import object_detector_factory
 import locale
 locale.setlocale(locale.LC_ALL, '')
 
@@ -38,7 +38,8 @@ def run(env):
     helper_cmd = help_cmd_factory(env['HELP_TEXT'])
     calculator_cmd = calculator_cmd_factory(env['WOLFRAM_TOKEN'])
     quit_cmd = quit_cmd_factory(updater)
-    translate = translate_cmd_factory(env['TRANSLATE_API'])
+    translate_cmd = translate_cmd_factory(env['TRANSLATE_API'])
+    object_detector_cmd = object_detector_factory(env['DARKNET_PATH'])
 
     # Defaults
     updater.dispatcher.add_handler(CommandHandler(
@@ -68,14 +69,12 @@ def run(env):
 
     # Translator
     updater.dispatcher.add_handler(CommandHandler(
-        'translate', translate, pass_args=True))
+        'translate', translate_cmd, pass_args=True))
 
     # Objects detection
-
     updater.dispatcher.add_handler(MessageHandler(
-        Filters.photo, detect_object_cmd
+        Filters.photo, object_detector_cmd
     ))
-
 
     # a.k.a. Callback Router
     updater.dispatcher.add_handler(CallbackQueryHandler(common_cb_handler))
